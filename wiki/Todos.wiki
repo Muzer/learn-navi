@@ -1,0 +1,20 @@
+#summary One-sentence summary of this page.
+
+= Todo List =
+
+Required items for 1.0 Release:
+  * Switch to new CSV dictionary by Tuiq
+  * Add "Na'vi in a Nutshell"
+
+
+
+Required items for 2.0 Release:
+  * Remote update of word lists
+  * Push notifications of available updates
+  * Use Core Data to store dictionary content (Needed for audio files)
+
+Required items for 3.0 Release:
+
+
+
+Please add to this list any other ideas and where you think they should go in the list of priority
