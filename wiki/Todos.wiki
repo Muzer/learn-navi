@@ -3,9 +3,9 @@
 = Todo List =
 
 Required items for 1.0 Release:
-  * Switch to new CSV dictionary by Tuiq - Done
-  * Switch English section to reference Tuiq CSV file - Started
-  * Add "Na'vi in a Nutshell" - Acquired .doc file of the book
+  * Switch to new CSV dictionary by Tuiq - *Done*
+  * Switch English section to reference Tuiq CSV file - _Started_
+  * Add "Na'vi in a Nutshell" - _Acquired .doc file of the book_
 
 
 
