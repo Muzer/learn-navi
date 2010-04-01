@@ -5,7 +5,7 @@
 Required items for 1.0 Release:
   * Switch to new CSV dictionary by Tuiq - *Done*
   * Switch English section to reference Tuiq CSV file - *Done*
-  * Add "Na'vi in a Nutshell" - _Acquired .doc file of the book_
+  * Add "Na'vi in a Nutshell" - _.doc file is in SVN_
 
 
 
