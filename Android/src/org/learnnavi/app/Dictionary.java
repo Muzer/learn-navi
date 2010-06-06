@@ -1,5 +1,8 @@
 package org.learnnavi.app;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.SearchManager;
@@ -17,7 +20,9 @@ import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
 
 public class Dictionary extends ListActivity implements OnClickListener {
 	private final int ENTRY_DIALOG = 100; 
@@ -25,6 +30,11 @@ public class Dictionary extends ListActivity implements OnClickListener {
 	static private Button mToNaviButton;
 	static private String mCurSearch;
 	static private String mCurSearchNavi;
+
+	static private final int DELETE_WEIGHT = 1;
+	static private final int INSERT_WEIGHT = 1;
+	static private final int SUBSTITUTE_WEIGHT = 2;
+	static private final int TRANSPOSITION_WEIGHT = 1;
 	
 	private int mViewingItem;
 	
@@ -139,19 +149,13 @@ public class Dictionary extends ListActivity implements OnClickListener {
 	private void setCurSearch(String search)
 	{
 		// Set the search term, keeping in mind which direction is being searched
-		if (mToNavi)
 			mCurSearch = search;
-		else
-			mCurSearchNavi = search;
 	}
 	
 	private String getCurSearch()
 	{
 		// Get the search term, keeping in mind which direction is being searched
-		if (mToNavi)
 			return mCurSearch;
-		else
-			return mCurSearchNavi;
 	}
 	
 	private boolean checkIntentForSearch(Intent intent)
@@ -187,9 +191,46 @@ public class Dictionary extends ListActivity implements OnClickListener {
 		}
 	}
 
+	//Calculates the Damereau-levenshtein distance between the strings
+	private Integer getDistance(String m, String n) {
+		int mLength = m.length();
+		int nLength = n.length();
+
+		//Some optimizations
+		if (mLength == 1) return nLength;
+		if (nLength == 1) return mLength;
+
+		int[][] matrix = new int[mLength+1][nLength+1];
+		
+		for(int i=0; i<=mLength; i++) {
+			matrix[i][0] = i;
+		}
+		for(int j=0; j<=nLength; j++) {
+			matrix[0][j] = j;
+		}
+
+		for (int i=1; i<=mLength; i++) {
+			for (int j=1; j<=nLength; j++) {
+				int cost = (n.charAt(j-1) == m.charAt(i-1)) ? 0 : 1;
+				int tmp[] = { (matrix[i-1][j] + 1), //delete
+							(matrix[i][j-1] + 1), //insert
+							(matrix[i-1][j-1] + cost)}; //substition
+				Arrays.sort(tmp);
+				matrix[i][j] = tmp[0]; //gets the minimum value
+
+				if (i > 1 && j > 1 && (m.charAt(i-1) == n.charAt(j-2)) && (m.charAt(i-2) == n.charAt(j-1))) {
+					int s = matrix[i][j];
+					int t = (matrix[i-2][j-2] + cost); //transpostion
+					matrix[i][j] = (s < t) ? s : t; 
+				}
+			}
+		}
+		return matrix[mLength][nLength];
+	}
+
     private void fillData() {
-    	Cursor c;
-    	Cursor ci;
+    	Cursor ciN, ciE;
+
     	String cursearch = getCurSearch();
     	
 		Button cancel = (Button)findViewById(R.id.CancelSearch);
@@ -199,39 +240,65 @@ public class Dictionary extends ListActivity implements OnClickListener {
     		cancel.setVisibility(Button.VISIBLE);
     		cancel.setText(getString(R.string.CancelSearch).replace("$F$", cursearch));
     	}
-    	else
+    	else {
     		// Hide the button, no search active
     		cancel.setVisibility(Button.GONE);
+			return;
+		}
     	
-    	if (mToNavi)
-    	{
-    		// Query the dictionary to Na'vi
-    		mToNaviButton.setText(R.string.ToNavi);
-      		c = EntryDBAdapter.getInstance(this).queryAllEntryToNaviLetters(cursearch);
-      		ci = EntryDBAdapter.getInstance(this).queryAllEntriesToNavi(cursearch);
-    	}
-    	else
-    	{
-    		// Query the dictionary form Na'vi
-    		mToNaviButton.setText(R.string.FromNavi);
-      		c = EntryDBAdapter.getInstance(this).queryAllEntryLetters(cursearch);
-      		ci = EntryDBAdapter.getInstance(this).queryAllEntries(cursearch);
-    	}
-    	startManagingCursor(c);
-    	startManagingCursor(ci);
+    	// Query the dictionary to Na'vi
+    	mToNaviButton.setText("Both");
+		//cursor in x
+      	ciN = EntryDBAdapter.getInstance(this).queryAllEntries(cursearch.substring(0,1));
+      	ciE = EntryDBAdapter.getInstance(this).queryAllEntriesToNavi(cursearch.substring(0,1));
 
-    	// Setup the mappings to layout elements
-    	String[] fromword = new String[] { EntryDBAdapter.KEY_WORD, EntryDBAdapter.KEY_DEFINITION };
-    	int[] toword = new int[] { R.id.EntryWord, R.id.EntryDefinition };
-    	String[] fromletter = new String[] { EntryDBAdapter.KEY_LETTER };
-    	int[] toletter = new int[] { R.id.DictionaryCategory };
+		ArrayList<WordStruct> results = new ArrayList<WordStruct>();
 
-    	// Create the adapter for the items and overall category / item combinations
-    	Adapter items = new SimpleCursorAdapter(this, R.layout.entry_row, ci, fromword, toword);
-    	CategoryNameCursorAdapter entries = new CategoryNameCursorAdapter(this, c, items, R.layout.entry_category, fromletter, toletter);
-    	// Fill out the data
-    	setListAdapter(entries);
-	}
+		int wordId = ciN.getColumnIndex(EntryDBAdapter.getInstance(this).KEY_WORD);
+		int defId = ciN.getColumnIndex(EntryDBAdapter.getInstance(this).KEY_DEFINITION);
+		//Word is in Na'vi 
+		//Def is in English
+		if(ciN.moveToFirst()) {
+			do {
+					String def = ciN.getString(defId);
+					String word = ciN.getString(wordId);
+					Integer dis = getDistance(word, cursearch);
+					//if (dis < THRESHOLD)
+						results.add(new WordStruct(dis, def+Integer.toString(dis), word));
+
+			} while (ciN.moveToNext());
+		}
+		wordId = ciE.getColumnIndex(EntryDBAdapter.getInstance(this).KEY_WORD);
+		defId = ciE.getColumnIndex(EntryDBAdapter.getInstance(this).KEY_DEFINITION);
+		//word is in english
+		//def is in Na'vi
+		if(ciE.moveToFirst()) {
+			do {
+					String def = ciE.getString(defId);
+					String word = ciE.getString(wordId);
+					if (word.contains(",") && !word.contains("(")) {
+						String words[] = word.split(",");
+						for(String subWord : words) {
+						  	String subWordT = subWord.trim();
+						  	if(subWordT.substring(0,1) != cursearch.substring(0,1))
+							  continue;
+
+							Integer dis = getDistance(subWordT, cursearch);
+							//if (dis < THRESHOLD)
+								results.add(new WordStruct(dis, def+Integer.toString(dis), subWordT));
+						}
+					} 
+					else {
+						Integer dis = getDistance(word, cursearch);
+						//if (dis < THRESHOLD)
+							results.add(new WordStruct(dis, def+Integer.toString(dis), word));
+					}
+			} while (ciE.moveToNext());
+		}
+
+		SearchResultsAdapter entries = new SearchResultsAdapter(this, results);
+		setListAdapter(entries);
+    }
     
 	private void fillFields(int rowid, Dialog d) {
 		Cursor entry = EntryDBAdapter.getInstance(this).querySingleEntry(rowid);
