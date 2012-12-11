@@ -76,7 +76,12 @@ public class EntryDBAdapter extends SQLiteOpenHelper {
     public static final String FILTER_VERB = "(metaWords.partOfSpeech LIKE '%^sv%' OR metaWords.partOfSpeech LIKE '%^v%') ";
     public static final String FILTER_ADJ = "(metaWords.partOfSpeech LIKE '%^adj.^%') ";
     public static final String FILTER_ADV = "(metaWords.partOfSpeech LIKE '%^adv.^%') ";
-    
+	public static final String FILTER_ADP = "(metaWords.partOfSpeech LIKE '%^adp.^%') ";
+    public static final String FILTER_CONJ = "(metaWords.partOfSpeech LIKE '%^conj.^%') ";
+	public static final String FILTER_PART = "(metaWords.partOfSpeech LIKE '%^part.^%') ";
+	public static final String FILTER_INTJ = "(metaWords.partOfSpeech LIKE '%^intj.^%')";
+	public static final String FILTER_INTER = "(metaWords.partOfSpeech LIKE '%^inter.^%')";
+	
     // Construct a query from the parts for the desired result
     private static String createQuery(boolean queryNavi, boolean queryLetter, boolean queryFilter, String queryPOS)
     {
