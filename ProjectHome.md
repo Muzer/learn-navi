@@ -1,0 +1,1 @@
+This project exists to create Mobile Apps to learn the Na'vi language.

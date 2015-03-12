@@ -1,0 +1,47 @@
+# Introduction #
+
+Kayrìlien from the learnnavi forums has done some research on letter frequency and posted them here: http://forum.learnnavi.org/your-projects-other-resources/navi-scrabble-letter-count/msg116485/#msg116485
+
+
+# Details #
+### Basics ###
+  * Needs valid wordlist. Will `<infixes>` be acceptable? If so, we wouldn't be able to simply use the word list from the dictionary.
+
+http://forum.learnnavi.org/your-projects-other-resources/navi-scrabble-letter-count/msg132342/#msg132342
+| # tiles | letter | worth |
+|:--------|:-------|:------|
+| 12 | A | 1 |
+| 8 | E | 1 |
+| 6 | N | 1 |
+| 6 | Y | 1 |
+| 6 | T | 1 |
+| 6 | L | 1 |
+| 5 | O | 1 |
+| 5 | U | 1 |
+| 4 | R | 1 |
+| 4 | I | 1 |
+| 4 | Ì | 2 |
+| 4 | (') | 2 |
+| 3 | Ä | 2 |
+| 3 | K | 3 |
+| 3 | P | 3 |
+| 3 | X | 8 |
+| 3 | S | 2 |
+| 3 | M | 3 |
+| 2 | G | 4 |
+| 2 | W | 4 |
+| 2 | F | 4 |
+| 2 | V | 4 |
+| 1 | H | 5 |
+| 1 | Z | 10 |
+| 2 | [BLANK](BLANK.md) | 0 |
+
+### Multiplayer ###
+  * Support for 2 players .... maybe up to 4? I don't know how hard it is.
+  * Lobby vs automatic matchmaking?
+    * Give players the ability to invite people to games
+  * Chat function
+  * scorekeeping
+    * central high scores list??
+
+# Early Mockups #
